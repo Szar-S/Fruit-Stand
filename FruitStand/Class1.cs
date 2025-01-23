@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 public abstract class Fruit
 {
-    public string Name;
-    public float Value;
+    public string Name { get; set; }
+    public double Value { get; set; }
     public override string ToString()
     {
         return "";
@@ -14,7 +14,7 @@ public abstract class Fruit
 }
 public class Orange : Fruit
 {
-    public Orange(float v)
+    public Orange(double v)
     {
         this.Name = "Orange";
         this.Value = v;
@@ -27,7 +27,7 @@ public class Orange : Fruit
 }
 public class Banana : Fruit
 {
-    public Banana(int v)
+    public Banana(double v)
     {
         this.Name = "Banana";
         this.Value = v;
@@ -39,7 +39,7 @@ public class Banana : Fruit
 }
 public class Apple : Fruit
 {
-    public Apple(int v)
+    public Apple(double v)
     {
         this.Name = "Apple";
         this.Value = v;
@@ -53,11 +53,10 @@ public class Apple : Fruit
 
 public class Basket
 {
-    public Fruit Fruit;
-    public int Quantity;
+    public Fruit Fruit { get; set; }
+    public int Quantity { get; set; }
     public Basket()
     {
-        Fruit f;
         Quantity = 0;
     }
     public Basket(Fruit f, int q)
@@ -66,7 +65,7 @@ public class Basket
         this.Price = f.Value;
         this.Quantity = q;
     }
-    private float Price;
+    private double Price;
     public double TotalPrice;
     public double CalculateTotalPrice()
     {
@@ -75,6 +74,6 @@ public class Basket
     }
     override public string ToString()
     {
-        return this.Fruit.Name;
+        return $"This basket has {this.Quantity} of {this.Fruit.Name} and the price of one of them is {this.Price} ";
     }
 }
