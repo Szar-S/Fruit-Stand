@@ -16,10 +16,12 @@ namespace FruitStand
         public static void SaveJSon(Basket basket, string filePath)
         {
             File.Open(filePath, FileMode.OpenOrCreate).Close();
-            string json = JsonSerializer.Serialize(basket);
-            File.AppendAllText(filePath, json);
+            string mine = JsonSerializer.Serialize(basket);
+            List<string> lines = File.ReadAllLines(filePath).ToList();
+            lines.Add(mine);
+            File.WriteAllLines(filePath, lines);
         }
-        public static Basket[] LoadFromJson(string filePath)
+        public static Basket LoadFromJson(string filePath, int baskNum)
         {
             Basket[] bask;
 
@@ -27,7 +29,7 @@ namespace FruitStand
             {
                 bask = JsonSerializer.Deserialize<Basket[]>(sr.ReadToEnd());
             }
-            return bask;
+            return bask[baskNum - 1];
         }
         private static void Main(string[] args)
         {
@@ -85,6 +87,7 @@ namespace FruitStand
             {
                 yn = AskAndReceive("Y,N: ").ToUpper();
             }
+
             Basket basket = new Basket();
             switch (yn)
             {
@@ -116,7 +119,7 @@ namespace FruitStand
                 {
                     baskNum = Convert.ToInt32(AskAndReceive("BasketNum can't be less than one: "));
                 }
-                Basket basket = LoadFromJson(filePath)[baskNum - 1];
+                Basket basket = LoadFromJson(filePath,baskNum);
                 return basket;
             }
             else if (File.ReadAllLines(filePath) == null)
@@ -124,19 +127,19 @@ namespace FruitStand
                 Console.WriteLine("No baskets found");
                 return null;
             }
-            else if (baskNum > LoadFromJson(filePath).Length)
+            else if (LoadFromJson(filePath, baskNum) == null)
             {
-                while (baskNum > LoadFromJson(filePath).Length)
+                while (LoadFromJson(filePath, baskNum) == null)
                 {
                     baskNum = Convert.ToInt32(AskAndReceive("BasketNum can't be more than the number of baskets: "));
                 }
-                Basket basket = LoadFromJson(filePath)[baskNum - 1];
+                Basket basket = LoadFromJson(filePath, baskNum);
                 return basket;
 
             }
             else
             {
-                Basket basket = LoadFromJson(filePath)[baskNum - 1];
+                Basket basket = LoadFromJson(filePath, baskNum);
                 return basket;
             }
         }
@@ -150,14 +153,15 @@ namespace FruitStand
             int quantity = Convert.ToInt32(q);
 
             Basket basket = new Basket(fruit, quantity);
-            SaveJSon(basket, filePath);
             return basket;
         }
         static public void printBaskets(string filePath)
         {
-            Basket[] baskets = LoadFromJson(filePath);
-            for (int i = 0; i < baskets.Length; i++)
+            List<Basket> baskets = new List<Basket>();
+            for (int i = 0; null != LoadFromJson(filePath, i); i++)
             {
+                Basket basket = LoadFromJson(filePath,i);
+                baskets.Append(basket);
                 Console.WriteLine(baskets[i].ToString());
             }
         }
