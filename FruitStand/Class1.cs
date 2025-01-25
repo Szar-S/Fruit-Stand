@@ -1,6 +1,7 @@
 ﻿using System;
 public class Fruit
 {
+    //Properties of the fruit (mainly null)
     public string Name { get; set; }
     public double Value { get; set; }
     public override string ToString()

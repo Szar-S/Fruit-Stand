@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Text;
 using System.Text.Json;
 
 namespace FruitStand
@@ -9,6 +10,7 @@ namespace FruitStand
     internal class Program
     {
         const string FilePath = "FruitStand.json";
+        //Asks the user for input and returns the input
         static class AskAndGet
         {
             public static string String(string question)
@@ -55,8 +57,10 @@ namespace FruitStand
             }
 
         }
+        //Json actions  and loading
         public class JsonAction
         {
+            //for saving the current basket to the file
             public static void Save(Basket basket, string FilePath)
             {
                 string line = File.ReadAllText(FilePath);
@@ -73,6 +77,7 @@ namespace FruitStand
                 string json = JsonSerializer.Serialize(bask);
                 File.WriteAllText(FilePath, json);
             }
+            //for loading a basket from the file
             public static Basket Load(string FilePath, int baskNum)
             {
                 string line = File.ReadAllText(FilePath);
@@ -89,17 +94,17 @@ namespace FruitStand
                 return bask[baskNum - 1];
             }
         }
+        //Asks the user for the name and price of the fruit and returns the fruit
         static Fruit newFruit()
         {
-            Fruit f;
             string fruit = AskAndGet.String("Which fruit(orange, banana or apple): ").ToLower();
             while (fruit != "orange" && fruit != "banana" && fruit != "apple")
             {
                 fruit = AskAndGet.String("orange, banana, apple: ");
             }
-
             double price = AskAndGet.Int("Price of one fruit: ");
-
+            
+            Fruit f;
             switch (fruit)
             {
                 case "orange":
@@ -117,6 +122,7 @@ namespace FruitStand
             }
             return f;
         }
+        //Asks the user if they want to add a new basket or get an existing basket
         static public Basket whichAction(string FilePath)
         {
             string yn = AskAndGet.String("Add new basket or get a existing basket(use add or get): ").ToLower();
@@ -141,6 +147,7 @@ namespace FruitStand
 
             return basket;
         }
+        //Actions for the basket class
         static public class BasketAction
         {
             static public Basket Get(string FilePath)
@@ -177,6 +184,7 @@ namespace FruitStand
                 return basket;
             }
         }
+        //Prints all the baskets in the file
         static public void printBaskets(string FilePath)
         {
             string line = File.ReadAllText(FilePath);
@@ -194,6 +202,7 @@ namespace FruitStand
                 }
             }
         }
+        //Prints the current basket
         static public void consolePrint(Basket basket)
         {
             if (basket == null)
