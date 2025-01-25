@@ -8,7 +8,7 @@ namespace FruitStand
 {
     internal class Program
     {
-        const string filePath = "FruitStand.json";
+        const string FilePath = "FruitStand.json";
         static class AskAndGet
         {
             public static string String(string question)
@@ -35,11 +35,11 @@ namespace FruitStand
             bool yes = true;
             while (yes)
             {
-                File.Open(filePath, FileMode.OpenOrCreate).Close();
+                File.Open(FilePath, FileMode.OpenOrCreate).Close();
 
-                printBaskets(filePath);
+                printBaskets(FilePath);
 
-                Basket basket = whichAction(filePath);
+                Basket basket = whichAction(FilePath);
                 
                 consolePrint(basket);
 
@@ -57,9 +57,9 @@ namespace FruitStand
         }
         public class JsonAction
         {
-            public static void Save(Basket basket, string filePath)
+            public static void Save(Basket basket, string FilePath)
             {
-                string line = File.ReadAllText(filePath);
+                string line = File.ReadAllText(FilePath);
                 List<Basket> bask = new List<Basket>();
                 if (line == "" || line == "{}" || line == null || line == "[]")
                 {
@@ -71,11 +71,11 @@ namespace FruitStand
                     bask.Add(basket);
                 }
                 string json = JsonSerializer.Serialize(bask);
-                File.WriteAllText(filePath, json);
+                File.WriteAllText(FilePath, json);
             }
-            public static Basket Load(string filePath, int baskNum)
+            public static Basket Load(string FilePath, int baskNum)
             {
-                string line = File.ReadAllText(filePath);
+                string line = File.ReadAllText(FilePath);
                 if (line == "" || line == "{}" || line == "[]" || line == null)
                 {
                     return null;
@@ -117,7 +117,7 @@ namespace FruitStand
             }
             return f;
         }
-        static public Basket whichAction(string filePath)
+        static public Basket whichAction(string FilePath)
         {
             string yn = AskAndGet.String("Add new basket or get a existing basket(use add or get): ").ToLower();
             while (yn != "add" && yn != "get")
@@ -131,11 +131,11 @@ namespace FruitStand
                 case "add":
                     Fruit f = newFruit();
 
-                    basket = BasketAction.Add(filePath, f);
-                    JsonAction.Save(basket, filePath);
+                    basket = BasketAction.Add(FilePath, f);
+                    JsonAction.Save(basket, FilePath);
                     break;
                 case "get":
-                    basket = BasketAction.Get(filePath);
+                    basket = BasketAction.Get(FilePath);
                     break;
             }
 
@@ -143,7 +143,7 @@ namespace FruitStand
         }
         static public class BasketAction
         {
-            static public Basket Get(string filePath)
+            static public Basket Get(string FilePath)
             {
                 int baskNum = AskAndGet.Int("Which Basket(Use numbers): ");
 
@@ -153,20 +153,20 @@ namespace FruitStand
                     {
                         baskNum = AskAndGet.Int("The number can't be less than one: ");
                     }
-                    Basket basket = JsonAction.Load(filePath, baskNum);
+                    Basket basket = JsonAction.Load(FilePath, baskNum);
                     return basket;
                 }
-                else if (JsonAction.Load(filePath, baskNum) == null)
+                else if (JsonAction.Load(FilePath, baskNum) == null)
                 {
                     return null;
                 }
                 else
                 {
-                    Basket basket = JsonAction.Load(filePath, baskNum);
+                    Basket basket = JsonAction.Load(FilePath, baskNum);
                     return basket;
                 }
             }
-            static public Basket Add(string filePath, Fruit fruit)
+            static public Basket Add(string FilePath, Fruit fruit)
             {
                 int quantity = AskAndGet.Int("How many fruits in the basket: ");
                 while (quantity < 1)
@@ -177,9 +177,9 @@ namespace FruitStand
                 return basket;
             }
         }
-        static public void printBaskets(string filePath)
+        static public void printBaskets(string FilePath)
         {
-            string line = File.ReadAllText(filePath);
+            string line = File.ReadAllText(FilePath);
             if (line == "" || line == "{}" || line == "[]" || line == null)
             {
                 Console.WriteLine("No baskets found");
