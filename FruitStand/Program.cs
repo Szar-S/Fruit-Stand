@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Xml;
-using System.Threading.Tasks;
-using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
 
@@ -22,13 +18,12 @@ namespace FruitStand
             bool yes = true;
             while (yes)
             {
-
                 File.Open(filePath, FileMode.OpenOrCreate).Close();
 
                 printBaskets(filePath);
 
-                Basket basket = new Basket();
-                basket = whichAction(filePath);
+                Basket basket = whichAction(filePath);
+                
                 consolePrint(basket);
 
                 string yn = AskAndReceive("Do you want to continue? Y/N: ").ToUpper();
@@ -68,6 +63,7 @@ namespace FruitStand
                 {
                     return null;
                 }
+
                 List<Basket> bask = JsonSerializer.Deserialize<List<Basket>>(line);
                 if (baskNum > bask.Count)
                 {
@@ -111,7 +107,6 @@ namespace FruitStand
         }
         static public Basket whichAction(string filePath)
         {
-
             string yn = AskAndReceive("Add new basket or get a existing basket(use add or get): ").ToLower();
             while (yn != "add" && yn != "get")
             {
@@ -131,6 +126,7 @@ namespace FruitStand
                     basket = BasketAction.Get(filePath);
                     break;
             }
+
             return basket;
         }
         static public class BasketAction

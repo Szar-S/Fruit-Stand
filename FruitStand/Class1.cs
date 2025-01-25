@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 public class Fruit
 {
     public string Name { get; set; }
@@ -55,35 +51,29 @@ public class Basket
 {
     public Fruit Fruit { get; set; }
     public int Quantity { get; set; }
-    private double Price;
     public Basket()
     {
-        Quantity = 0;
-        Price = 0;
     }
     public Basket(Fruit f)
     {
         this.Fruit = f;
-        this.Price = f.Value;
         this.Quantity = 1;
     }
     public Basket(Fruit f, int q)
     {
         this.Fruit = f;
-        this.Price = f.Value;
         this.Quantity = q;
     }
     public double TotalPrice
     {
         get
         {
-            return Quantity * Price;
+            return Quantity * Fruit.Value;
         }
-        set { }
     }
 
     override public string ToString()
     {
-        return $"This basket has {this.Quantity} of {this.Fruit.Name} and the price of one of them is {Fruit.Value} ";
+        return $"This basket contains {this.Quantity} of {this.Fruit.Name}. The price for one piece is {this.Fruit.Value}, making the total cost {TotalPrice}. ";
     }
 }
