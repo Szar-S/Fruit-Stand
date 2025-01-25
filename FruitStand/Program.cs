@@ -9,9 +9,26 @@ namespace FruitStand
     internal class Program
     {
         const string filePath = "FruitStand.json";
-        static string AskAndReceive(string question){
-            Console.Write(question);
-            return Console.ReadLine();
+        static class AskAndGet
+        {
+            public static string String(string question)
+            {
+                Console.Write(question);
+                return Console.ReadLine();
+            }
+            public static int Int(string question)
+            {
+                Console.Write(question);
+                string input = Console.ReadLine();
+                int result;
+                while (!input.All(char.IsDigit) || input.Replace(" ", "") == "")
+                {
+                    Console.Write(question);
+                    input = Console.ReadLine();
+                }
+                result = Convert.ToInt32(input);
+                return result;
+            }
         }
         private static void Main(string[] args)
         {
@@ -26,10 +43,10 @@ namespace FruitStand
                 
                 consolePrint(basket);
 
-                string yn = AskAndReceive("Do you want to continue? Y/N: ").ToUpper();
+                string yn = AskAndGet.String("Do you want to continue? Y/N: ").ToUpper();
                 while (yn != "Y" && yn != "N")
                 {
-                    yn = AskAndReceive("Do you want to continue? Y/N: ").ToUpper();
+                    yn = AskAndGet.String("Do you want to continue? Y/N: ").ToUpper();
                 }
                 if (yn == "N")
                 {
@@ -75,18 +92,13 @@ namespace FruitStand
         static Fruit newFruit()
         {
             Fruit f;
-            string fruit = AskAndReceive("Which fruit(orange, banana or apple): ").ToLower();
+            string fruit = AskAndGet.String("Which fruit(orange, banana or apple): ").ToLower();
             while (fruit != "orange" && fruit != "banana" && fruit != "apple")
             {
-                fruit = AskAndReceive("orange, banana, apple: ");
+                fruit = AskAndGet.String("orange, banana, apple: ");
             }
 
-            string p = AskAndReceive("Price of one fruit: ");
-            while (!p.All(char.IsDigit) || p.Replace(" ","") == "")
-            {
-                p = AskAndReceive("Price of one fruit: ");
-            }
-            double price = Convert.ToDouble(p);
+            double price = AskAndGet.Int("Price of one fruit: ");
 
             switch (fruit)
             {
@@ -107,10 +119,10 @@ namespace FruitStand
         }
         static public Basket whichAction(string filePath)
         {
-            string yn = AskAndReceive("Add new basket or get a existing basket(use add or get): ").ToLower();
+            string yn = AskAndGet.String("Add new basket or get a existing basket(use add or get): ").ToLower();
             while (yn != "add" && yn != "get")
             {
-                yn = AskAndReceive("Use add or get: ").ToLower();
+                yn = AskAndGet.String("Use add or get: ").ToLower();
             }
 
             Basket basket = new Basket();
@@ -133,18 +145,13 @@ namespace FruitStand
         {
             static public Basket Get(string filePath)
             {
+                int baskNum = AskAndGet.Int("Which Basket(Use numbers): ");
 
-                string bN = AskAndReceive("Which Basket(Use numbers): ");
-                while (!bN.All(char.IsDigit) || bN.Replace(" ", "") == "")
-                {
-                    bN = AskAndReceive("Which Basket(Use numbers): ");
-                }
-                int baskNum = Convert.ToInt32(bN);
                 if (baskNum - 1 < 0)
                 {
                     while (baskNum - 1 < 0)
                     {
-                        baskNum = Convert.ToInt32(AskAndReceive("The number can't be less than one: "));
+                        baskNum = AskAndGet.Int("The number can't be less than one: ");
                     }
                     Basket basket = JsonAction.Load(filePath, baskNum);
                     return basket;
@@ -161,13 +168,11 @@ namespace FruitStand
             }
             static public Basket Add(string filePath, Fruit fruit)
             {
-                string q = AskAndReceive("How many fruits in the basket: ");
-                while (!q.All(char.IsDigit) || q.Replace(" ", "") == "")
+                int quantity = AskAndGet.Int("How many fruits in the basket: ");
+                while (quantity < 1)
                 {
-                    q = AskAndReceive("How many fruits in the basket: ");
+                    quantity = AskAndGet.Int("The quantity can't be less than one: ");
                 }
-                int quantity = Convert.ToInt32(q);
-
                 Basket basket = new Basket(fruit, quantity);
                 return basket;
             }
