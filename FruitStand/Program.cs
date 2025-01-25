@@ -13,55 +13,85 @@ namespace FruitStand
     internal class Program
     {
         const string filePath = "FruitStand.json";
-        public static void SaveJSon(Basket basket, string filePath)
-        {
-            File.Open(filePath, FileMode.OpenOrCreate).Close();
-            string mine = JsonSerializer.Serialize(basket);
-            List<string> lines = File.ReadAllLines(filePath).ToList();
-            lines.Add(mine);
-            File.WriteAllLines(filePath, lines);
-        }
-        public static Basket LoadFromJson(string filePath, int baskNum)
-        {
-            Basket[] bask;
-
-            using (StreamReader sr = new StreamReader(filePath))
-            {
-                bask = JsonSerializer.Deserialize<Basket[]>(sr.ReadToEnd());
-            }
-            return bask[baskNum - 1];
+        static string AskAndReceive(string question){
+            Console.Write(question);
+            return Console.ReadLine();
         }
         private static void Main(string[] args)
         {
-            Basket basket = new Basket();
+            bool yes = true;
+            while (yes)
+            {
 
-            basket = whichAction(filePath);
+                File.Open(filePath, FileMode.OpenOrCreate).Close();
 
-            basket.CalculateTotalPrice();
+                printBaskets(filePath);
 
-            consolePrint(basket);
+                Basket basket = new Basket();
+                basket = whichAction(filePath);
+                consolePrint(basket);
+
+                string yn = AskAndReceive("Do you want to continue? Y/N: ").ToUpper();
+                while (yn != "Y" && yn != "N")
+                {
+                    yn = AskAndReceive("Do you want to continue? Y/N: ").ToUpper();
+                }
+                if (yn == "N")
+                {
+                    yes = false;
+                }
+            }
 
         }
-        static string AskAndReceive(string question)
+        public class JsonAction
         {
-            Console.Write(question);
-            return Console.ReadLine();
+            public static void Save(Basket basket, string filePath)
+            {
+                string line = File.ReadAllText(filePath);
+                List<Basket> bask = new List<Basket>();
+                if (line == "" || line == "{}" || line == null || line == "[]")
+                {
+                    bask.Add(basket);
+                }
+                else
+                {
+                    bask = JsonSerializer.Deserialize<List<Basket>>(line);
+                    bask.Add(basket);
+                }
+                string json = JsonSerializer.Serialize(bask);
+                File.WriteAllText(filePath, json);
+            }
+            public static Basket Load(string filePath, int baskNum)
+            {
+                string line = File.ReadAllText(filePath);
+                if (line == "" || line == "{}" || line == "[]" || line == null)
+                {
+                    return null;
+                }
+                List<Basket> bask = JsonSerializer.Deserialize<List<Basket>>(line);
+                if (baskNum > bask.Count)
+                {
+                    return null;
+                }
+                return bask[baskNum - 1];
+            }
         }
         static Fruit newFruit()
         {
             Fruit f;
-            string fruit = AskAndReceive("orange, banana, apple: ").ToLower();
-
-            string p = AskAndReceive("Price: ");
-            while (!p.All(char.IsDigit))
-            {
-                p = AskAndReceive("Price: ");
-            }
-            double price = Convert.ToDouble(p);
+            string fruit = AskAndReceive("Which fruit(orange, banana or apple): ").ToLower();
             while (fruit != "orange" && fruit != "banana" && fruit != "apple")
             {
                 fruit = AskAndReceive("orange, banana, apple: ");
             }
+
+            string p = AskAndReceive("Price of one fruit: ");
+            while (!p.All(char.IsDigit) || p.Replace(" ","") == "")
+            {
+                p = AskAndReceive("Price of one fruit: ");
+            }
+            double price = Convert.ToDouble(p);
+
             switch (fruit)
             {
                 case "orange":
@@ -74,7 +104,7 @@ namespace FruitStand
                     f = new Apple(price);
                     break;
                 default:
-                    f = new Apple(price);
+                    f = new Fruit();
                     break;
             }
             return f;
@@ -82,96 +112,104 @@ namespace FruitStand
         static public Basket whichAction(string filePath)
         {
 
-            string yn = AskAndReceive("Y,N: ").ToUpper();
-            while (yn != "Y" && yn != "N")
+            string yn = AskAndReceive("Add new basket or get a existing basket(use add or get): ").ToLower();
+            while (yn != "add" && yn != "get")
             {
-                yn = AskAndReceive("Y,N: ").ToUpper();
+                yn = AskAndReceive("Use add or get: ").ToLower();
             }
 
             Basket basket = new Basket();
             switch (yn)
             {
-                case "Y":
+                case "add":
                     Fruit f = newFruit();
 
-                    basket = newBasket(filePath, f);
+                    basket = BasketAction.Add(filePath, f);
+                    JsonAction.Save(basket, filePath);
                     break;
-                case "N":
-                    basket = getBasket(filePath);
+                case "get":
+                    basket = BasketAction.Get(filePath);
                     break;
-
             }
-            SaveJSon(basket, filePath);
             return basket;
         }
-        static public Basket getBasket(string filePath)
+        static public class BasketAction
         {
+            static public Basket Get(string filePath)
+            {
 
-            string bN = AskAndReceive("basketNum: ");
-            while (!bN.All(char.IsDigit))
-            {
-                bN = AskAndReceive("basketNum: ");
-            }
-            int baskNum = Convert.ToInt32(bN);
-            if (baskNum - 1 < 0)
-            {
-                while (baskNum - 1 < 0)
+                string bN = AskAndReceive("Which Basket(Use numbers): ");
+                while (!bN.All(char.IsDigit) || bN.Replace(" ", "") == "")
                 {
-                    baskNum = Convert.ToInt32(AskAndReceive("BasketNum can't be less than one: "));
+                    bN = AskAndReceive("Which Basket(Use numbers): ");
                 }
-                Basket basket = LoadFromJson(filePath,baskNum);
-                return basket;
-            }
-            else if (File.ReadAllLines(filePath) == null)
-            {
-                Console.WriteLine("No baskets found");
-                return null;
-            }
-            else if (LoadFromJson(filePath, baskNum) == null)
-            {
-                while (LoadFromJson(filePath, baskNum) == null)
+                int baskNum = Convert.ToInt32(bN);
+                if (baskNum - 1 < 0)
                 {
-                    baskNum = Convert.ToInt32(AskAndReceive("BasketNum can't be more than the number of baskets: "));
+                    while (baskNum - 1 < 0)
+                    {
+                        baskNum = Convert.ToInt32(AskAndReceive("The number can't be less than one: "));
+                    }
+                    Basket basket = JsonAction.Load(filePath, baskNum);
+                    return basket;
                 }
-                Basket basket = LoadFromJson(filePath, baskNum);
-                return basket;
-
+                else if (JsonAction.Load(filePath, baskNum) == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    Basket basket = JsonAction.Load(filePath, baskNum);
+                    return basket;
+                }
             }
-            else
+            static public Basket Add(string filePath, Fruit fruit)
             {
-                Basket basket = LoadFromJson(filePath, baskNum);
+                string q = AskAndReceive("How many fruits in the basket: ");
+                while (!q.All(char.IsDigit) || q.Replace(" ", "") == "")
+                {
+                    q = AskAndReceive("How many fruits in the basket: ");
+                }
+                int quantity = Convert.ToInt32(q);
+
+                Basket basket = new Basket(fruit, quantity);
                 return basket;
             }
-        }
-        static public Basket newBasket(string filePath, Fruit fruit)
-        {
-            string q = AskAndReceive("Quantity: ");
-            while (!q.All(char.IsDigit))
-            {
-                q = AskAndReceive("Quantity: ");
-            }
-            int quantity = Convert.ToInt32(q);
-
-            Basket basket = new Basket(fruit, quantity);
-            return basket;
         }
         static public void printBaskets(string filePath)
         {
-            List<Basket> baskets = new List<Basket>();
-            for (int i = 0; null != LoadFromJson(filePath, i); i++)
+            string line = File.ReadAllText(filePath);
+            if (line == "" || line == "{}" || line == "[]" || line == null)
             {
-                Basket basket = LoadFromJson(filePath,i);
-                baskets.Append(basket);
-                Console.WriteLine(baskets[i].ToString());
+                Console.WriteLine("No baskets found");
+                return;
+            }
+            else
+            {
+                List<Basket> bask = JsonSerializer.Deserialize<List<Basket>>(line);
+                for (int i = 0; i < bask.Count; i++)
+                {
+                    Console.WriteLine((i + 1) + ": " + bask[i].ToString());
+                }
             }
         }
         static public void consolePrint(Basket basket)
         {
-            Console.WriteLine(basket.ToString());
-            Console.WriteLine("Fruit: " + basket.Fruit.Name);
-            Console.WriteLine("Quantity: " + basket.Quantity);
-            Console.WriteLine("Price: " + basket.Fruit.Value);
-            Console.WriteLine("Total price of basket: " + basket.TotalPrice);
+            if (basket == null)
+            {
+                Console.WriteLine("No baskets found");
+                return;
+            }
+            else
+            {
+                Console.WriteLine(basket.ToString());
+                /*
+                Console.WriteLine("Fruit: " + basket.Fruit.Name);
+                Console.WriteLine("Quantity: " + basket.Quantity);
+                Console.WriteLine("Price: " + basket.Fruit.Value);
+                Console.WriteLine("Total price of basket: " + basket.TotalPrice.ToString());
+                */
+            }
         }
     }
 }
