@@ -19,7 +19,7 @@ namespace FruitStand
                 //Creates the file if it doesn't exist
                 if (!File.Exists(FilePath))
                 {
-                    File.Open(FilePath, FileMode.OpenOrCreate).Close();
+                    File.Create(FilePath).Close();
                 }
                 //Prints all the baskets in the file
                 printBaskets(FilePath);

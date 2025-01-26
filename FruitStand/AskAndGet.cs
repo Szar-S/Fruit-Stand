@@ -13,7 +13,7 @@ public static class AskAndGet
         Console.Write(question);
         string input = Console.ReadLine();
         int result;
-        while (!int.TryParse(input, out int value) || input.Replace(" ", "") == "")
+        while (!int.TryParse(input, out int value) || string.IsNullOrWhiteSpace(input))
         {
             Console.Write(question);
             input = Console.ReadLine();
@@ -26,7 +26,7 @@ public static class AskAndGet
         Console.Write(question);
         string input = Console.ReadLine();
         double result;
-        while (!double.TryParse(input, out double value) || input.Replace(" ", "") == "")
+        while (!double.TryParse(input, out double value) || string.IsNullOrWhiteSpace(input))
         {
             Console.Write(question);
             input = Console.ReadLine();

@@ -6,7 +6,7 @@ public class Fruit
     public double Value { get; set; }
     public override string ToString()
     {
-        return "";
+        return Name;
     }
 }
 public class Orange : Fruit
