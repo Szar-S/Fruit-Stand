@@ -23,7 +23,7 @@ namespace FruitStand
                 Console.Write(question);
                 string input = Console.ReadLine();
                 int result;
-                while (!input.All(char.IsDigit) || input.Replace(" ", "") == "")
+                while (!int.TryParse(input, out int value) || input.Replace(" ", "") == "")
                 {
                     Console.Write(question);
                     input = Console.ReadLine();
@@ -31,20 +31,55 @@ namespace FruitStand
                 result = Convert.ToInt32(input);
                 return result;
             }
+            public static double Double(string question)
+            {
+                Console.Write(question);
+                string input = Console.ReadLine();
+                double result;
+                while (!double.TryParse(input, out double value) || input.Replace(" ", "") == "")
+                {
+                    Console.Write(question);
+                    input = Console.ReadLine();
+                }
+                result = Convert.ToDouble(input);
+                return result;
+            }
         }
         private static void Main(string[] args)
         {
             bool yes = true;
+            Console.WriteLine("Welcome to the fruit stand!");
             while (yes)
             {
-                File.Open(FilePath, FileMode.OpenOrCreate).Close();
-
+                //Creates the file if it doesn't exist
+                if (!File.Exists(FilePath))
+                {
+                    File.Open(FilePath, FileMode.OpenOrCreate).Close();
+                }
+                //Prints all the baskets in the file
                 printBaskets(FilePath);
+                //Asks the user if they want to add a new basket or get an existing basket
+                string choice = AskAndGet.String("Add new basket or get a existing basket(use add or get): ").ToLower();
+                while (choice != "add" && choice != "get")
+                {
+                    choice = AskAndGet.String("Use add or get: ").ToLower();
+                }
+                Basket basket = new Basket();
+                switch (choice)
+                {
+                    case "add":
+                        Fruit f = newFruit();
 
-                Basket basket = whichAction(FilePath);
-                
+                        basket = BasketAction.Add(FilePath, f);
+                        JsonAction.Save(basket, FilePath);
+                        break;
+                    case "get":
+                        basket = BasketAction.Get(FilePath);
+                        break;
+                }
+                //Prints the current basket
                 consolePrint(basket);
-
+                //Asks the user if they want to continue the program
                 string yn = AskAndGet.String("Do you want to continue? Y/N: ").ToUpper();
                 while (yn != "Y" && yn != "N")
                 {
@@ -55,43 +90,58 @@ namespace FruitStand
                     yes = false;
                 }
             }
-
+            Console.WriteLine("Thank you for visiting!");
         }
-        //Json actions  and loading
+        //Json actions
         public class JsonAction
         {
             //for saving the current basket to the file
             public static void Save(Basket basket, string FilePath)
             {
-                string line = File.ReadAllText(FilePath);
-                List<Basket> bask = new List<Basket>();
-                if (line == "" || line == "{}" || line == null || line == "[]")
+                try
                 {
-                    bask.Add(basket);
+                    string line = File.ReadAllText(FilePath);
+                    List<Basket> bask = new List<Basket>();
+                    if (line == "" || line == "{}" || line == null || line == "[]")
+                    {
+                        bask.Add(basket);
+                    }
+                    else
+                    {
+                        bask = JsonSerializer.Deserialize<List<Basket>>(line);
+                        bask.Add(basket);
+                    }
+                    string json = JsonSerializer.Serialize(bask);
+                    File.WriteAllText(FilePath, json);
                 }
-                else
+                catch (Exception e)
                 {
-                    bask = JsonSerializer.Deserialize<List<Basket>>(line);
-                    bask.Add(basket);
+                    Console.WriteLine(e.Message);
                 }
-                string json = JsonSerializer.Serialize(bask);
-                File.WriteAllText(FilePath, json);
             }
             //for loading a basket from the file
             public static Basket Load(string FilePath, int baskNum)
             {
-                string line = File.ReadAllText(FilePath);
-                if (line == "" || line == "{}" || line == "[]" || line == null)
+                try
                 {
-                    return null;
-                }
+                    string line = File.ReadAllText(FilePath);
+                    if (line == "" || line == "{}" || line == "[]" || line == null)
+                    {
+                        return null;
+                    }
 
-                List<Basket> bask = JsonSerializer.Deserialize<List<Basket>>(line);
-                if (baskNum > bask.Count)
+                    List<Basket> bask = JsonSerializer.Deserialize<List<Basket>>(line);
+                    if (baskNum > bask.Count)
+                    {
+                        return null;
+                    }
+                    return bask[baskNum - 1];
+                }
+                catch (Exception e)
                 {
+                    Console.WriteLine(e.Message);
                     return null;
                 }
-                return bask[baskNum - 1];
             }
         }
         //Asks the user for the name and price of the fruit and returns the fruit
@@ -102,8 +152,8 @@ namespace FruitStand
             {
                 fruit = AskAndGet.String("orange, banana, apple: ");
             }
-            double price = AskAndGet.Int("Price of one fruit: ");
-            
+            double price = AskAndGet.Double("Price of one fruit: ");
+
             Fruit f;
             switch (fruit)
             {
@@ -121,31 +171,6 @@ namespace FruitStand
                     break;
             }
             return f;
-        }
-        //Asks the user if they want to add a new basket or get an existing basket
-        static public Basket whichAction(string FilePath)
-        {
-            string yn = AskAndGet.String("Add new basket or get a existing basket(use add or get): ").ToLower();
-            while (yn != "add" && yn != "get")
-            {
-                yn = AskAndGet.String("Use add or get: ").ToLower();
-            }
-
-            Basket basket = new Basket();
-            switch (yn)
-            {
-                case "add":
-                    Fruit f = newFruit();
-
-                    basket = BasketAction.Add(FilePath, f);
-                    JsonAction.Save(basket, FilePath);
-                    break;
-                case "get":
-                    basket = BasketAction.Get(FilePath);
-                    break;
-            }
-
-            return basket;
         }
         //Actions for the basket class
         static public class BasketAction
